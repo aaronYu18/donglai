@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.courier.db.dao.PaintBrandMapper">
+    <select id="findByName" resultType="com.courier.db.entity.PaintBrand">
+        SELECT * FROM paint_brand p WHERE p.name = #{name}
+    </select>
+
+    <select id="findByParentIdAndCarVendorName" resultType="com.courier.db.entity.PaintBrand">
+        SELECT * from paint_brand WHERE parent_id= #{parentId} and car_vendor_id = (SELECT id from car_vendor WHERE `name`= #{carVendorName})
+    </select>
+
+    <select id="findPerByCNoAndVM" resultType="java.lang.Float">
+        SELECT c.percent FROM color_number c, (SELECT id from car_vendor WHERE `name`=#{car_vendor}) v where c.number = #{color_num}
+	    and c.car_vendor_id = v.id
+        <if test="car_model != null">
+            and c.car_model_id in (SELECT id FROM car_model WHERE name=#{car_model} and car_vendor_id=v.id)
+        </if>
+    </select>
+</mapper>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <description>CoreBusiness</description>
+
+    <context:annotation-config/>
+    <!-- 自动扫描将带有注解的类 纳入spring容器管理 -->
+    <context:component-scan base-package="com.courier.core"/>
+
+    <!--thread config-->
+    <bean id="threadPoolTaskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+        <property name="corePoolSize" value="${threadPool.corePoolSize}"/>
+        <property name="maxPoolSize" value="${threadPool.maxPoolSize}"/>
+        <property name="queueCapacity" value="${threadPool.queueCapacity}"/>
+        <property name="keepAliveSeconds" value="${threadPool.keepAliveSeconds}"/>
+        <property name="rejectedExecutionHandler">
+            <bean class="java.util.concurrent.ThreadPoolExecutor$CallerRunsPolicy"/>
+        </property>
+    </bean>
+</beans>

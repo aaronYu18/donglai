@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.courier.db.dao.FormulaMapper">
+    <!--  多条件查询  -->
+    <select id="findByFilters" resultType="com.courier.db.entity.Formula">
+        SELECT * FROM formula WHERE 1=1
+        <if test="beginT != null">and created &gt;= #{beginT}</if>
+        <if test="endT != null">and created &lt;= #{endT}</if>
+        <if test="maxId != null">and id &lt;= #{maxId}</if>
+        and deleted is null and is_verified in (0,1,2) and type in ('similarity', 'normal')
+        <if test="sortName != null">
+            order by ${sortName}
+            <if test="sortType == 0">asc</if>
+            <if test="sortType == 1">desc</if>
+        </if>
+        <if test="sortName == null">order by id asc</if>
+        <if test="pageNo != null and pageSize != null">LIMIT #{pageNo} , #{pageSize}</if>
+    </select>
+
+
+    <!--  多条件统计  -->
+    <select id="countByFilters" parameterType="java.util.Map" resultType="com.courier.commons.vModel.MyCount">
+        SELECT COUNT(*) as totalNo, max(id) as maxId FROM formula WHERE 1=1
+        <if test="beginT != null">and created &gt;= #{beginT}</if>
+        <if test="endT != null">and created &lt;= #{endT}</if>
+        and deleted is null and is_verified in (0,1,2) and type in ('similarity', 'normal')
+    </select>
+
+
+
+    <!--  多条件查询 子配方 -->
+    <select id="findSubByFilters" resultType="com.courier.db.entity.Formula">
+        SELECT * FROM formula WHERE parent_id is not null order by created desc LIMIT #{pageNo} , #{pageSize}
+    </select>
+
+    <!--  多条件统计子配方数目  -->
+    <select id="countSubByFilters" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM formula WHERE parent_id is not null
+    </select>
+
+    <!--  多条件统计子配方数目  -->
+    <select id="getFormulaByColorNum" parameterType="java.util.Map" resultType="com.courier.db.entity.Formula">
+        SELECT * FROM formula WHERE color_num = #{colorNum} AND is_verified >= -1 AND deleted IS NULL AND type = 'normal' and id !=#{id}
+    </select>
+
+    <!--  多条件统计子配方数目  -->
+    <select id="calculateStar" parameterType="java.util.Map" resultType="java.lang.Byte">
+
+        SELECT
+            IFNULL(ROUND((p.star_count + c.star_count) / (p.num + c.num)), 0)
+        from
+            (SELECT IFNULL(sum(star_count), 0) star_count, COUNT(*) num FROM `comment` where formula_id = #{parentId}) p,
+            (SELECT IFNULL(sum(star_count), 0) star_count, COUNT(*) num FROM `comment` where formula_id = #{id}) c
+    </select>
+
+    <!--sql 删除-->
+    <delete id="deleteById">
+        DELETE FROM formula WHERE id = #{id}
+    </delete>
+</mapper>

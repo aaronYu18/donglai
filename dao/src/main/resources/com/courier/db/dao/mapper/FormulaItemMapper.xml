@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.courier.db.dao.FormulaItemMapper">
+    <select id="findByFid" resultType="com.courier.db.entity.FormulaItem">
+        SELECT * from formula_item WHERE formula_id = #{formulaId} and (deleted is null or deleted = '')
+    </select>
+
+
+    <select id="findVByFid" resultType="com.courier.db.vmodel.VFormulaItem">
+       SELECT a.dosage dosage, m.number number from (SELECT * from formula_item WHERE formula_id= #{formulaId}) a LEFT JOIN masterbatch m on a.masterbatch_id = m.id
+    </select>
+
+
+    <select id="findSimilarNum" resultType="java.lang.String">
+       SELECT masterbatch_num FROM similarMasterbatch WHERE s_masterbatch_num = #{number} order by id
+    </select>
+
+    <select id="findMBy3Key" resultType="java.lang.Long">
+       SELECT id from masterbatch WHERE parent_id = (
+          SELECT id from masterbatch WHERE number = (SELECT number from masterbatch WHERE id = #{mId}) and paint_brand_id = #{oldPid} and deleted is null )
+          and paint_brand_id=#{newPid} and deleted is null
+    </select>
+
+    <select id="findMBy2Key" resultType="java.lang.Long">
+      SELECT id from masterbatch WHERE id = (
+        SELECT parent_id from masterbatch WHERE number =(SELECT number from masterbatch WHERE id = #{mId}) and paint_brand_id = #{oldPid} and deleted is null )
+        and deleted is null
+
+    </select>
+
+    <!--sql 删除-->
+    <delete id="deleteByFId">
+        DELETE FROM formula_item WHERE formula_id = #{fId}
+    </delete>
+</mapper>
